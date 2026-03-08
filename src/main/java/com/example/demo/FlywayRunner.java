@@ -10,18 +10,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FlywayRunner {
 
-    @Bean
-    public Flyway flyway(DataSource dataSource) {
-        return Flyway.configure()
-                .dataSource(dataSource)
-                .locations("classpath:db/migration")
-                .schemas("public")
-                .baselineOnMigrate(true)
-                .load();
-    }
+  @Bean
+  public Flyway flyway(DataSource dataSource) {
+    return Flyway.configure()
+        .dataSource(dataSource)
+        .locations("classpath:db/migration")
+        .schemas("public")
+        .baselineOnMigrate(true)
+        .load();
+  }
 
-    @Bean
-    ApplicationRunner runFlyway(Flyway flyway) {
-        return args -> flyway.migrate();
-    }
+  @Bean
+  ApplicationRunner runFlyway(Flyway flyway) {
+    return args -> flyway.migrate();
+  }
 }

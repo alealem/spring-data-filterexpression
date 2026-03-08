@@ -1,43 +1,54 @@
 package com.example.demo.domain;
 
-import jakarta.persistence.*;
 import java.util.*;
+
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "contents")
 public class Content {
 
-    @Id
-    private UUID id;
+  @Id private UUID id;
 
-    @Column(nullable = false)
-    private String title;
+  @Column(nullable = false)
+  private String title;
 
-    private String description;
+  private String description;
 
-    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContentItem> items = new ArrayList<>();
+  @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ContentItem> items = new ArrayList<>();
 
-    protected Content() {}
+  protected Content() {}
 
-    public Content(UUID id, String title, String description) {
-        this.id = id;
-        this.title = title;
-        this.description=description;
-    }
+  public Content(UUID id, String title, String description) {
+    this.id = id;
+    this.title = title;
+    this.description = description;
+  }
 
-    public void update(String title, String description) {
-        this.title = title;
-        this.description = description;
-    }
+  public void update(String title, String description) {
+    this.title = title;
+    this.description = description;
+  }
 
-    public void addItem(ContentItem item) {
-        items.add(item);
-        item.setContent(this);
-    }
+  public void addItem(ContentItem item) {
+    items.add(item);
+    item.setContent(this);
+  }
 
-    public UUID getId() { return id; }
-    public String getTitle() { return title; }
-    public String getDescription() { return description; }
-    public List<ContentItem> getItems() { return items; }
+  public UUID getId() {
+    return id;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public List<ContentItem> getItems() {
+    return items;
+  }
 }

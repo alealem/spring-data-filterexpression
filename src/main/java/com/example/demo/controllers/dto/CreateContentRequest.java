@@ -1,4 +1,6 @@
 package com.example.demo.controllers.dto;
 
-public record CreateContentRequest() {
-}
+import java.util.List;
+
+public record CreateContentRequest(
+    String title, String description, List<CreateContentItemRequest> items) {}

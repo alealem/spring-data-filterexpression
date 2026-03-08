@@ -1,9 +1,10 @@
 package com.example.demo.services.search;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record OrExpression(
-        @JsonProperty("operator") String operator,
-        @JsonProperty("expressions") List<FilterExpression> expressions
-) implements FilterExpression {}
+    @JsonProperty("operator") String operator,
+    @JsonProperty("expressions") List<FilterExpression> expressions)
+    implements FilterExpression {}

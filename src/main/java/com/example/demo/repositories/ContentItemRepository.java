@@ -1,18 +1,19 @@
 package com.example.demo.repositories;
 
+import java.util.UUID;
 
-
-import com.example.demo.domain.ContentItem;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
-import java.util.UUID;
+import com.example.demo.domain.ContentItem;
 
-public interface ContentItemRepository extends JpaRepository<ContentItem, UUID>, JpaSpecificationExecutor<ContentItem> {
+public interface ContentItemRepository
+    extends JpaRepository<ContentItem, UUID>, JpaSpecificationExecutor<ContentItem> {
 
-    @Query(
-            value = """
+  @Query(
+      value =
+          """
             select ci.*
             from content_items ci
             where ci.content_id = :contentId
@@ -27,7 +28,8 @@ public interface ContentItemRepository extends JpaRepository<ContentItem, UUID>,
               end desc,
               ci.id desc
         """,
-            countQuery = """
+      countQuery =
+          """
             select count(*)
             from content_items ci
             where ci.content_id = :contentId
@@ -36,11 +38,7 @@ public interface ContentItemRepository extends JpaRepository<ContentItem, UUID>,
                     or ci.body_tsv @@ websearch_to_tsquery('simple', trim(:q))
                   )
         """,
-            nativeQuery = true
-    )
-    Page<ContentItem> search(
-            @Param("contentId") UUID contentId,
-            @Param("q") String q,
-            Pageable pageable
-    );
+      nativeQuery = true)
+  Page<ContentItem> search(
+      @Param("contentId") UUID contentId, @Param("q") String q, Pageable pageable);
 }

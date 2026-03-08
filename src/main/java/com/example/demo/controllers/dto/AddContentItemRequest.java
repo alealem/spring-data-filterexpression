@@ -1,4 +1,5 @@
 package com.example.demo.controllers.dto;
 
-public record AddContentItemRequest() {
-}
+import java.util.Map;
+
+public record AddContentItemRequest(Map<String, Object> body) {}
