@@ -2,8 +2,6 @@ package com.example.demo.services;
 
 import java.util.UUID;
 
-import jakarta.persistence.EntityNotFoundException;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -20,6 +18,7 @@ import com.example.demo.controllers.utils.PaginatedResult;
 import com.example.demo.controllers.utils.Pagination;
 import com.example.demo.domain.Content;
 import com.example.demo.domain.ContentItem;
+import com.example.demo.errors.ResourceNotFoundException;
 import com.example.demo.repositories.ContentItemRepository;
 import com.example.demo.repositories.ContentRepository;
 import com.example.demo.services.search.FilterExpression;
@@ -74,10 +73,7 @@ public class ContentService {
 
   @Transactional(readOnly = true)
   public ContentDto getContent(UUID contentId) {
-    Content content =
-        contentRepo
-            .findById(contentId)
-            .orElseThrow(() -> new EntityNotFoundException("Content not found: " + contentId));
+    Content content = requireContent(contentId);
     return mapper.toDto(content);
   }
 
@@ -86,7 +82,7 @@ public class ContentService {
     Content content =
         contentRepo
             .findWithItemsById(contentId)
-            .orElseThrow(() -> new EntityNotFoundException("Content not found: " + contentId));
+            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
 
     return mapper.toDto(content);
   }
@@ -110,39 +106,30 @@ public class ContentService {
 
   @Transactional
   public ContentDto updateContent(UUID contentId, UpsertContentRequest request) {
-    Content content =
-        contentRepo
-            .findById(contentId)
-            .orElseThrow(() -> new EntityNotFoundException("Content not found: " + contentId));
-
+    Content content = requireContent(contentId);
     content.update(request.title(), request.description());
-
     return mapper.toDto(content);
   }
 
   @Transactional
   public void deleteContent(UUID contentId) {
-    if (!contentRepo.existsById(contentId)) {
-      throw new EntityNotFoundException("Content not found: " + contentId);
-    }
-    contentRepo.deleteById(contentId);
+    Content content = requireContent(contentId);
+    contentRepo.delete(content);
   }
 
   @Transactional(readOnly = true)
   public PaginatedResult<ContentItemDto> searchItems(UUID contentId, String q, Pageable pageable) {
+    requireContentExists(contentId);
+
     var page = itemRepo.search(contentId, q, pageable);
     return Pagination.from(page, mapper::toItemDto);
   }
 
   @Transactional
   public ContentItemDto addItem(UUID contentId, AddContentItemRequest request) {
-    Content content =
-        contentRepo
-            .findById(contentId)
-            .orElseThrow(() -> new EntityNotFoundException("Content not found: " + contentId));
+    Content content = requireContent(contentId);
 
     ContentItem item = new ContentItem(UUID.randomUUID(), objectMapper.valueToTree(request.body()));
-
     content.addItem(item);
 
     return mapper.toItemDto(item);
@@ -151,6 +138,9 @@ public class ContentService {
   @Transactional(readOnly = true)
   public PaginatedResult<ContentItemDto> searchItems(
       UUID contentId, FilterExpression filter, Pageable pageable) {
+
+    requireContentExists(contentId);
+
     Specification<ContentItem> contentSpec =
         (root, query, cb) -> cb.equal(root.get("content").get("id"), contentId);
 
@@ -159,6 +149,18 @@ public class ContentService {
 
     var page = itemRepo.findAll(finalSpec, pageable);
     return Pagination.from(page, mapper::toItemDto);
+  }
+
+  private Content requireContent(UUID contentId) {
+    return contentRepo
+        .findById(contentId)
+        .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
+  }
+
+  private void requireContentExists(UUID contentId) {
+    if (!contentRepo.existsById(contentId)) {
+      throw new ResourceNotFoundException("Content not found: " + contentId);
+    }
   }
 
   private JsonNode json(String k1, String v1, String k2, String v2) {

@@ -33,6 +33,7 @@ public interface ContentItemRepository
             select count(*)
             from content_items ci
             where ci.content_id = :contentId
+
               and (
                     coalesce(trim(:q), '') = ''
                     or ci.body_tsv @@ websearch_to_tsquery('simple', trim(:q))
