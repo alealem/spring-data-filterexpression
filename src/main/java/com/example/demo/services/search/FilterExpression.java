@@ -1,7 +1,6 @@
 package com.example.demo.services.search;
 
 import com.fasterxml.jackson.annotation.*;
-import java.util.List;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "operator", visible = true)
 @JsonSubTypes({

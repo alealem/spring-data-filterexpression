@@ -12,7 +12,11 @@ public final class FilterSpecBuilder {
     public static <T> Specification<T> toSpecification(FilterExpression expr) {
         return (root, query, cb) -> toPredicate(expr, root, query, cb);
     }
-
+    private static final Set<String> JSONB_COLUMNS = Set.of(
+            "body",
+            "payload",
+            "metadata"
+    );
     private static Predicate toPredicate(
             FilterExpression expr,
             Root<?> root,
@@ -83,6 +87,10 @@ public final class FilterSpecBuilder {
     }
 
     private static Predicate buildValuePredicate(ValueExpression v, Root<?> root, CriteriaBuilder cb) {
+        if (isJsonField(v.field())) {
+            return buildJsonValuePredicate(v, root, cb);
+        }
+
         Path<?> path = resolvePath(root, v.field());
         String op = v.operator();
         Object raw = v.value();
@@ -94,10 +102,10 @@ public final class FilterSpecBuilder {
             case "less" -> cb.lessThan(pathAsComparable(path), asComparable(raw));
             case "less-or-equal" -> cb.lessThanOrEqualTo(pathAsComparable(path), asComparable(raw));
 
-            case "like" -> buildLike(cb, path, Objects.toString(raw, ""), v.caseSensitive());
+            case "like" -> buildLike(cb, path.as(String.class), Objects.toString(raw, ""), v.caseSensitive());
 
             case "regexp" -> {
-                  Expression<Boolean> expr = cb.function(
+                Expression<Boolean> expr = cb.function(
                         "regexp",
                         Boolean.class,
                         path.as(String.class),
@@ -111,17 +119,56 @@ public final class FilterSpecBuilder {
 
         return maybeNegate(v.exclude(), p, cb);
     }
+    private static Predicate buildJsonValuePredicate(ValueExpression v, Root<?> root, CriteriaBuilder cb) {
+        Expression<String> jsonText = resolveJsonTextPath(root, cb, v.field());
+        String op = v.operator();
+        Object raw = v.value();
 
+        Predicate p = switch (op) {
+            case "equal" -> cb.equal(jsonText, raw == null ? null : String.valueOf(raw));
+
+            case "like" -> buildLike(cb, jsonText, Objects.toString(raw, ""), v.caseSensitive());
+
+            case "greater" -> cb.greaterThan(jsonText, String.valueOf(raw));
+            case "greater-or-equal" -> cb.greaterThanOrEqualTo(jsonText, String.valueOf(raw));
+            case "less" -> cb.lessThan(jsonText, String.valueOf(raw));
+            case "less-or-equal" -> cb.lessThanOrEqualTo(jsonText, String.valueOf(raw));
+
+            case "regexp" -> {
+                Expression<Boolean> expr = cb.function(
+                        "regexp",
+                        Boolean.class,
+                        jsonText,
+                        cb.literal(Objects.toString(raw, ""))
+                );
+                yield cb.isTrue(expr);
+            }
+
+            default -> throw new IllegalArgumentException("Unsupported JSON value operator: " + op);
+        };
+
+        return maybeNegate(v.exclude(), p, cb);
+    }
+    
     private static Predicate buildValuesPredicate(ValuesExpression v, Root<?> root, CriteriaBuilder cb) {
         if (!"in".equals(v.operator())) {
             throw new IllegalArgumentException("Unsupported values operator: " + v.operator());
         }
 
-        Path<?> path = resolvePath(root, v.field());
+        CriteriaBuilder.In<Object> in;
 
-        CriteriaBuilder.In<Object> in = cb.in(path.as(Object.class));
-        for (Object o : Optional.ofNullable(v.values()).orElse(List.of())) {
-            in.value(o);
+        if (isJsonField(v.field())) {
+            Expression<String> expr = resolveJsonTextPath(root, cb, v.field());
+            in = cb.in(expr);
+            for (Object o : Optional.ofNullable(v.values()).orElse(List.of())) {
+                in.value(o == null ? null : String.valueOf(o));
+            }
+        } else {
+            Path<?> path = resolvePath(root, v.field());
+            in = cb.in(path.as(Object.class));
+            for (Object o : Optional.ofNullable(v.values()).orElse(List.of())) {
+                in.value(o);
+            }
         }
 
         return maybeNegate(v.exclude(), in, cb);
@@ -142,14 +189,19 @@ public final class FilterSpecBuilder {
         return maybeNegate(b.exclude(), p, cb);
     }
 
-    private static Predicate buildLike(CriteriaBuilder cb, Path<?> path, String value, Boolean caseSensitive) {
+    private static Predicate buildLike(
+            CriteriaBuilder cb,
+            Expression<String> expr,
+            String pattern,
+            Boolean caseSensitive
+    ) {
         boolean cs = Boolean.TRUE.equals(caseSensitive);
-        String pattern = value; // assume FE sends % if desired
 
         if (cs) {
-            return cb.like(path.as(String.class), pattern);
+            return cb.like(expr, pattern);
         }
-        return cb.like(cb.lower(path.as(String.class)), pattern.toLowerCase(Locale.ROOT));
+
+        return cb.like(cb.lower(expr), pattern.toLowerCase(Locale.ROOT));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -253,5 +305,46 @@ public final class FilterSpecBuilder {
         }
 
         return negate ? cb.not(p) : p;
+    }
+    private static boolean isJsonField(FieldPathDto field) {
+        List<String> segs = field == null ? List.of() : field.segments();
+        return !segs.isEmpty() && JSONB_COLUMNS.contains(segs.get(0));
+    }
+
+    private static Expression<String> resolveJsonTextPath(
+            Root<?> root,
+            CriteriaBuilder cb,
+            FieldPathDto field
+    ) {
+        List<String> segs = field == null ? List.of() : field.segments();
+
+        if (segs.isEmpty()) {
+            throw new IllegalArgumentException("field is required");
+        }
+
+        if (segs.size() < 2) {
+            throw new IllegalArgumentException(
+                    "JSON field path must contain at least the json column and one nested key"
+            );
+        }
+
+        String jsonColumn = segs.get(0);
+        Expression<?> jsonExpr = root.get(jsonColumn);
+
+        List<Expression<?>> args = new ArrayList<>();
+        args.add(jsonExpr);
+
+        for (int i = 1; i < segs.size(); i++) {
+            args.add(cb.literal(segs.get(i)));
+        }
+
+        @SuppressWarnings("unchecked")
+        Expression<String> expr = cb.function(
+                "jsonb_extract_path_text",
+                String.class,
+                args.toArray(new Expression[0])
+        );
+
+        return expr;
     }
 }

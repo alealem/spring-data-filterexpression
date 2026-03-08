@@ -26,6 +26,11 @@ public class Content {
         this.description=description;
     }
 
+    public void update(String title, String description) {
+        this.title = title;
+        this.description = description;
+    }
+
     public void addItem(ContentItem item) {
         items.add(item);
         item.setContent(this);
@@ -33,5 +38,6 @@ public class Content {
 
     public UUID getId() { return id; }
     public String getTitle() { return title; }
+    public String getDescription() { return description; }
     public List<ContentItem> getItems() { return items; }
 }

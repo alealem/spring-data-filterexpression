@@ -1,24 +1,25 @@
 package com.example.demo.services.search;
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.JsonParser;
-import tools.jackson.databind.DeserializationContext;
-import tools.jackson.databind.DatabindException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ValueDeserializer;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Deserializes:
- *   "a.b.c"  -> ["a","b","c"]
- *   ["a","b","c"] -> ["a","b","c"]
- */
-public final class FieldPathDtoDeserializer extends ValueDeserializer<FieldPathDto> {
+public final class FieldPathDtoDeserializer extends StdDeserializer<FieldPathDto> {
+
+    public FieldPathDtoDeserializer() {
+        super(FieldPathDto.class);
+    }
 
     @Override
-    public FieldPathDto deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
+    public FieldPathDto deserialize(JsonParser p, DeserializationContext ctxt)
+            throws IOException, JacksonException {
 
         JsonNode node = p.readValueAsTree();
 
@@ -26,7 +27,6 @@ public final class FieldPathDtoDeserializer extends ValueDeserializer<FieldPathD
             return new FieldPathDto(List.of());
         }
 
-        // Case 1: "customer.name"
         if (node.isTextual()) {
             String text = node.asText();
             if (text.isBlank()) {
@@ -35,7 +35,6 @@ public final class FieldPathDtoDeserializer extends ValueDeserializer<FieldPathD
             return new FieldPathDto(List.of(text.split("\\.")));
         }
 
-        // Case 2: ["customer", "name"]
         if (node.isArray()) {
             List<String> segments = new ArrayList<>();
             for (JsonNode element : node) {
@@ -46,7 +45,9 @@ public final class FieldPathDtoDeserializer extends ValueDeserializer<FieldPathD
             return new FieldPathDto(segments);
         }
 
-        throw DatabindException.from(p,
-                "Unsupported JSON value for FieldPathDto: " + node);
+        throw JsonMappingException.from(
+                p,
+                "Unsupported JSON value for FieldPathDto: " + node
+        );
     }
 }

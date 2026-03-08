@@ -1,0 +1,280 @@
+{
+  "info": {
+    "name": "Content API",
+    "_postman_id": "c4f2b2e0-7c9c-4c7b-9c9d-2e4d9f9b8a11",
+    "description": "Postman collection for Content and ContentItem endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api"
+    },
+    {
+      "key": "contentId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Demo",
+      "item": [
+        {
+          "name": "Seed Demo Content",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/seed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "seed"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Contents",
+      "item": [
+        {
+          "name": "List Contents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contents?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contents"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Content By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contents/{{contentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contents",
+                "{{contentId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Content",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My Content\",\n  \"description\": \"My first content\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contents"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Content",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Content Title\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contents/{{contentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contents",
+                "{{contentId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Content",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contents/{{contentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contents",
+                "{{contentId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Content Items",
+      "item": [
+        {
+          "name": "Search Items By Query Param",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contents/{{contentId}}/items?q=invoice&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contents",
+                "{{contentId}}",
+                "items"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "invoice"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Items By Filter Expression",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operator\": \"and\",\n  \"expressions\": [\n    {\n      \"operator\": \"like\",\n      \"exclude\": false,\n      \"field\": [\"body\", \"text\"],\n      \"value\": \"%Invoice%\",\n      \"caseSensitive\": false\n    },\n    {\n      \"operator\": \"equal\",\n      \"exclude\": false,\n      \"field\": [\"body\", \"type\"],\n      \"value\": \"paragraph\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contents/{{contentId}}/items/search?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contents",
+                "{{contentId}}",
+                "items",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Items By Filter Expression - Simple",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operator\": \"like\",\n  \"exclude\": false,\n  \"field\": [\"body\", \"text\"],\n  \"value\": \"%meeting%\",\n  \"caseSensitive\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contents/{{contentId}}/items/search?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contents",
+                "{{contentId}}",
+                "items",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
