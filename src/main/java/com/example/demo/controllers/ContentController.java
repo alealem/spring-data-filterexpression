@@ -42,11 +42,6 @@ public class ContentController {
     return contentService.getContent(contentId);
   }
 
-  @GetMapping("/contents-with-items/{contentId}")
-  public ContentDto getContentWithItems(@PathVariable UUID contentId) {
-    return contentService.getContentWithItems(contentId);
-  }
-
   @PostMapping("/contents")
   @ResponseStatus(HttpStatus.CREATED)
   public ContentDto createContent(@RequestBody CreateContentRequest request) {
@@ -82,5 +77,11 @@ public class ContentController {
   public PaginatedResult<ContentItemDto> searchItems(
       @PathVariable UUID contentId, @RequestBody FilterExpression filter, Pageable pageable) {
     return contentService.searchItems(contentId, filter, pageable);
+  }
+
+  @PostMapping("/contents/search")
+  public PaginatedResult<ContentDto> searchContents(
+      @RequestBody FilterExpression filter, Pageable pageable) {
+    return contentService.searchContents(filter, pageable);
   }
 }

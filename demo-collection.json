@@ -1,20 +1,12 @@
 {
   "info": {
+    "_postman_id": "eada0caa-88c7-409c-9f04-f5f5546e5872",
     "name": "Content API",
-    "_postman_id": "c4f2b2e0-7c9c-4c7b-9c9d-2e4d9f9b8a11",
     "description": "Postman collection for Content and ContentItem endpoints.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "44827416",
+    "_collection_link": "https://go.postman.co/collection/44827416-eada0caa-88c7-409c-9f04-f5f5546e5872?source=collection_link"
   },
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8080/api"
-    },
-    {
-      "key": "contentId",
-      "value": ""
-    }
-  ],
   "item": [
     {
       "name": "Demo",
@@ -99,7 +91,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"My Content\",\n  \"description\": \"My first content\"\n}"
+              "raw": "{\n  \"title\": \"Invoice Documents\",\n  \"description\": \"Invoices and notes\",\n  \"items\": [\n    {\n      \"body\": {\n        \"type\": \"paragraph\",\n        \"text\": \"Invoice 2023 is paid\"\n      }\n    },\n    {\n      \"body\": {\n        \"type\": \"note\",\n        \"text\": \"Customer meeting next week\"\n      }\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/contents",
@@ -208,7 +200,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"operator\": \"and\",\n  \"expressions\": [\n    {\n      \"operator\": \"like\",\n      \"exclude\": false,\n      \"field\": [\"body\", \"text\"],\n      \"value\": \"%Invoice%\",\n      \"caseSensitive\": false\n    },\n    {\n      \"operator\": \"equal\",\n      \"exclude\": false,\n      \"field\": [\"body\", \"type\"],\n      \"value\": \"paragraph\"\n    }\n  ]\n}"
+              "raw": "{\n  \"operator\": \"and\",\n  \"expressions\": [\n    {\n      \"operator\": \"like\",\n      \"exclude\": false,\n      \"field\": [\"body\", \"text\"],\n      \"value\": \"%invoice%\",\n      \"caseSensitive\": false\n    },\n    {\n      \"operator\": \"like\",\n      \"exclude\": false,\n      \"field\": [\"body\", \"customer\", \"name\"],\n      \"value\": \"%Acme%\",\n      \"caseSensitive\": false\n    },\n    {\n      \"operator\": \"equal\",\n      \"exclude\": false,\n      \"field\": [\"body\", \"metadata\", \"createdBy\"],\n      \"value\": \"system\"\n    },\n    {\n      \"operator\": \"greater\",\n      \"exclude\": false,\n      \"field\": [\"body\", \"amount\", \"total\"],\n      \"value\": 1000\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/contents/{{contentId}}/items/search?page=0&size=10",
@@ -247,7 +239,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"operator\": \"like\",\n  \"exclude\": false,\n  \"field\": [\"body\", \"text\"],\n  \"value\": \"%meeting%\",\n  \"caseSensitive\": false\n}"
+              "raw": "{\n  \"operator\": \"like\",\n  \"exclude\": false,\n  \"field\": [\"body\", \"text\"],\n  \"value\": \"%09.03.2026%\",\n  \"caseSensitive\": false\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/contents/{{contentId}}/items/search?page=0&size=10",
@@ -273,8 +265,73 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Add Item",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": {\n  \"type\": \"invoice\",\n  \"status\": \"approved\",\n  \"text\": \"Invoice 2024-001 approved for payment\",\n\n  \"customer\": {\n    \"id\": \"CUST-991\",\n    \"name\": \"Acme Corporation\",\n    \"industry\": \"Manufacturing\",\n    \"contact\": {\n      \"email\": \"finance@acme.com\",\n      \"phone\": \"+49-6221-123456\",\n      \"address\": {\n        \"country\": \"Germany\",\n        \"city\": \"Heidelberg\",\n        \"street\": \"Hauptstraße 10\"\n      }\n    }\n  },\n\n  \"metadata\": {\n    \"createdBy\": \"system\",\n    \"createdAt\": \"2024-12-01T10:12:45Z\",\n    \"approvedBy\": {\n      \"id\": \"USR-881\",\n      \"name\": \"John Smith\",\n      \"department\": \"Finance\"\n    },\n    \"tags\": [\n      \"invoice\",\n      \"2024\",\n      \"priority\"\n    ]\n  },\n\n  \"amount\": {\n    \"currency\": \"EUR\",\n    \"subtotal\": 1200.50,\n    \"tax\": 228.09,\n    \"total\": 1428.59\n  },\n\n  \"lineItems\": [\n    {\n      \"position\": 1,\n      \"product\": {\n        \"id\": \"PRD-1001\",\n        \"name\": \"Enterprise License\",\n        \"category\": \"Software\"\n      },\n      \"quantity\": 2,\n      \"unitPrice\": 500,\n      \"total\": 1000\n    },\n    {\n      \"position\": 2,\n      \"product\": {\n        \"id\": \"PRD-2002\",\n        \"name\": \"Implementation Service\",\n        \"category\": \"Consulting\"\n      },\n      \"quantity\": 1,\n      \"unitPrice\": 200.50,\n      \"total\": 200.50\n    }\n  ],\n\n  \"workflow\": {\n    \"steps\": [\n      {\n        \"step\": \"created\",\n        \"timestamp\": \"2024-12-01T10:12:45Z\",\n        \"user\": \"system\"\n      },\n      {\n        \"step\": \"reviewed\",\n        \"timestamp\": \"2024-12-02T09:22:10Z\",\n        \"user\": \"finance-team\"\n      },\n      {\n        \"step\": \"approved\",\n        \"timestamp\": \"2024-12-02T15:01:33Z\",\n        \"user\": \"john.smith\"\n      }\n    ]\n  }\n}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contents/{{contentId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contents",
+                "{{contentId}}",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Content",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operator\": \"and\",\n  \"expressions\": [\n    {\n      \"operator\": \"or\",\n      \"expressions\": [\n        {\n          \"operator\": \"equal\",\n          \"exclude\": false,\n          \"field\": [\"items\", \"body\", \"type\"],\n          \"value\": \"invoice\"\n        },\n        {\n          \"operator\": \"equal\",\n          \"exclude\": false,\n          \"field\": [\"items\", \"body\", \"type\"],\n          \"value\": \"payment\"\n        }\n      ]\n    },\n    {\n      \"operator\": \"greater\",\n      \"exclude\": false,\n      \"field\": [\"items\", \"body\", \"amount\", \"total\"],\n      \"value\": 1000\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contents/search",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contents",
+                "search"
+              ]
+            }
+          },
+          "response": []
         }
       ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api"
+    },
+    {
+      "key": "contentId",
+      "value": ""
     }
   ]
 }

@@ -23,6 +23,8 @@ import com.example.demo.repositories.ContentItemRepository;
 import com.example.demo.repositories.ContentRepository;
 import com.example.demo.services.search.FilterExpression;
 import com.example.demo.services.search.FilterSpecBuilder;
+import com.example.demo.services.search.models.ContentItemSearchModel;
+import com.example.demo.services.search.models.ContentSearchModel;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -34,16 +36,22 @@ public class ContentService {
   private final ContentItemRepository itemRepo;
   private final ContentMapper mapper;
   private final ObjectMapper objectMapper;
+  private final ContentSearchModel contentSearchModel;
+  private final ContentItemSearchModel contentItemSearchModel;
 
   public ContentService(
       ContentRepository contentRepo,
       ContentItemRepository itemRepo,
       ContentMapper mapper,
-      ObjectMapper objectMapper) {
+      ObjectMapper objectMapper,
+      ContentSearchModel contentSearchModel,
+      ContentItemSearchModel contentItemSearchModel) {
     this.contentRepo = contentRepo;
     this.itemRepo = itemRepo;
     this.mapper = mapper;
     this.objectMapper = objectMapper;
+    this.contentSearchModel = contentSearchModel;
+    this.contentItemSearchModel = contentItemSearchModel;
   }
 
   @Transactional
@@ -136,18 +144,24 @@ public class ContentService {
   }
 
   @Transactional(readOnly = true)
+  public PaginatedResult<ContentDto> searchContents(FilterExpression filter, Pageable pageable) {
+    Specification<Content> spec = FilterSpecBuilder.toSpecification(filter, contentSearchModel);
+    var page = contentRepo.findAll(spec, pageable);
+    return Pagination.from(page, mapper::toDto);
+  }
+
+  @Transactional(readOnly = true)
   public PaginatedResult<ContentItemDto> searchItems(
       UUID contentId, FilterExpression filter, Pageable pageable) {
-
     requireContentExists(contentId);
 
     Specification<ContentItem> contentSpec =
         (root, query, cb) -> cb.equal(root.get("content").get("id"), contentId);
 
-    Specification<ContentItem> filterSpec = FilterSpecBuilder.toSpecification(filter);
-    Specification<ContentItem> finalSpec = contentSpec.and(filterSpec);
+    Specification<ContentItem> filterSpec =
+        FilterSpecBuilder.toSpecification(filter, contentItemSearchModel);
 
-    var page = itemRepo.findAll(finalSpec, pageable);
+    var page = itemRepo.findAll(contentSpec.and(filterSpec), pageable);
     return Pagination.from(page, mapper::toItemDto);
   }
 
