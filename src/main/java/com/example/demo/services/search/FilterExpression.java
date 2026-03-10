@@ -1,6 +1,7 @@
 package com.example.demo.services.search;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -14,22 +15,20 @@ import com.fasterxml.jackson.annotation.*;
   @JsonSubTypes.Type(value = ValueExpression.class, name = "less"),
   @JsonSubTypes.Type(value = ValueExpression.class, name = "less-or-equal"),
   @JsonSubTypes.Type(value = ValueExpression.class, name = "like"),
-  @JsonSubTypes.Type(value = ValueExpression.class, name = "regexp"),
   @JsonSubTypes.Type(value = ValuesExpression.class, name = "in"),
   @JsonSubTypes.Type(value = BetweenExpression.class, name = "between"),
   @JsonSubTypes.Type(value = AndExpression.class, name = "and"),
   @JsonSubTypes.Type(value = OrExpression.class, name = "or"),
-  @JsonSubTypes.Type(value = NotExpression.class, name = "not"),
-  @JsonSubTypes.Type(value = ComboSelectionExpression.class, name = "combo-selection")
+  @JsonSubTypes.Type(value = NotExpression.class, name = "not")
 })
 public sealed interface FilterExpression
-    permits ValueExpression,
-        ValuesExpression,
+    permits AndExpression,
         BetweenExpression,
-        AndExpression,
-        OrExpression,
+        ComboSelectionExpression,
         NotExpression,
-        ComboSelectionExpression {
+        OrExpression,
+        ValueExpression,
+        ValuesExpression {
 
   String operator();
 }
