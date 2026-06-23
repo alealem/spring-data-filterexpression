@@ -1,0 +1,34 @@
+{
+  "operator": "and",
+  "expressions": [
+    {
+      "operator": "or",
+      "expressions": [
+        {
+          "operator": "equal",
+          "exclude": false,
+          "field": "items.body.type",
+          "value": "note"
+        },
+        {
+          "operator": "equal",
+          "exclude": false,
+          "field": ["items", "body", "customer", "contact", "email"],
+          "value": "finance@acme.com"
+        },
+        {
+          "operator": "equal",
+          "exclude": false,
+          "field": ["items", "body", "type"],
+          "value": "paragraph"
+        }
+      ]
+    },
+    {
+      "operator": "greater",
+      "exclude": false,
+      "field": ["items", "body", "amount", "total"],
+      "value": 1000
+    }
+  ]
+}

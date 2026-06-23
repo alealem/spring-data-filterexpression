@@ -1,0 +1,6 @@
+.git
+.idea
+target
+app/target
+search-jpa/target
+*.iml

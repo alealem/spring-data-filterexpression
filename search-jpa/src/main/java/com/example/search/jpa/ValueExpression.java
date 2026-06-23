@@ -1,0 +1,11 @@
+package com.example.search.jpa;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record ValueExpression(
+    @JsonProperty("operator") String operator,
+    @JsonProperty("exclude") boolean exclude,
+    @JsonProperty("field") Object field,
+    @JsonProperty("value") Object value,
+    @JsonProperty("caseSensitive") Boolean caseSensitive)
+    implements FilterExpression {}

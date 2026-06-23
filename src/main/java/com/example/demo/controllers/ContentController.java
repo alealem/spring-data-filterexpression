@@ -14,7 +14,7 @@ import com.example.demo.controllers.dto.CreateContentRequest;
 import com.example.demo.controllers.dto.UpsertContentRequest;
 import com.example.demo.controllers.utils.PaginatedResult;
 import com.example.demo.services.ContentService;
-import com.example.demo.services.search.FilterExpression;
+import com.example.search.jpa.FilterExpression;
 
 @RestController
 @RequestMapping("/api")

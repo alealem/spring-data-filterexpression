@@ -1,0 +1,86 @@
+{
+  "title": "Invoice Documents",
+  "description": "Invoices and notes",
+  "items": [
+    {
+      "body": {
+        "type": "invoice",
+        "status": "approved",
+        "text": "Invoice 2024-001 approved for payment",
+        "customer": {
+          "id": "CUST-991",
+          "name": "Acme Corporation",
+          "industry": "Manufacturing",
+          "contact": {
+            "email": "finance@acme.com",
+            "phone": "+49-6221-123456",
+            "address": {
+              "country": "Germany",
+              "city": "Heidelberg",
+              "street": "Hauptstraße 10"
+            }
+          }
+        },
+        "metadata": {
+          "createdBy": "system",
+          "createdAt": "2024-12-01T10:12:45Z",
+          "approvedBy": {
+            "id": "USR-881",
+            "name": "John Smith",
+            "department": "Finance"
+          },
+          "tags": ["invoice", "2024", "priority"]
+        },
+        "amount": {
+          "currency": "EUR",
+          "subtotal": 1200.50,
+          "tax": 228.09,
+          "total": 1428.59
+        },
+        "lineItems": [
+          {
+            "position": 1,
+            "product": {
+              "id": "PRD-1001",
+              "name": "Enterprise License",
+              "category": "Software"
+            },
+            "quantity": 2,
+            "unitPrice": 500,
+            "total": 1000
+          },
+          {
+            "position": 2,
+            "product": {
+              "id": "PRD-2002",
+              "name": "Implementation Service",
+              "category": "Consulting"
+            },
+            "quantity": 1,
+            "unitPrice": 200.50,
+            "total": 200.50
+          }
+        ],
+        "workflow": {
+          "steps": [
+            {
+              "step": "created",
+              "timestamp": "2024-12-01T10:12:45Z",
+              "user": "system"
+            },
+            {
+              "step": "reviewed",
+              "timestamp": "2024-12-02T09:22:10Z",
+              "user": "finance-team"
+            },
+            {
+              "step": "approved",
+              "timestamp": "2024-12-02T15:01:33Z",
+              "user": "john.smith"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

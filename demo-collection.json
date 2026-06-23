@@ -106,6 +106,33 @@
           "response": []
         },
         {
+          "name": "Search Content",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operator\": \"and\",\n  \"expressions\": [\n    {\n      \"operator\": \"or\",\n      \"expressions\": [\n        {\n          \"operator\": \"equal\",\n          \"exclude\": false,\n          \"field\": [\"items\", \"body\", \"type\"],\n          \"value\": \"note\"\n        },{          \"operator\": \"equal\",\n          \"exclude\": false,\n          \"field\": [\"items\", \"body\", \"customer\",\"contact\",\"email\"],\n          \"value\": \"finance@acme.com\"},\n        {\n          \"operator\": \"equal\",\n          \"exclude\": false,\n          \"field\": [\"items\", \"body\", \"type\"],\n          \"value\": \"paragraph\"\n        }\n      ]\n    },\n    {\n      \"operator\": \"greater\",\n      \"exclude\": false,\n      \"field\": [\"items\", \"body\", \"amount\", \"total\"],\n      \"value\": 1000\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contents/search",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contents",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Update Content",
           "request": {
             "method": "PUT",
@@ -289,33 +316,6 @@
                 "contents",
                 "{{contentId}}",
                 "items"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Search Content",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"operator\": \"and\",\n  \"expressions\": [\n    {\n      \"operator\": \"or\",\n      \"expressions\": [\n        {\n          \"operator\": \"equal\",\n          \"exclude\": false,\n          \"field\": [\"items\", \"body\", \"type\"],\n          \"value\": \"invoice\"\n        },\n        {\n          \"operator\": \"equal\",\n          \"exclude\": false,\n          \"field\": [\"items\", \"body\", \"type\"],\n          \"value\": \"payment\"\n        }\n      ]\n    },\n    {\n      \"operator\": \"greater\",\n      \"exclude\": false,\n      \"field\": [\"items\", \"body\", \"amount\", \"total\"],\n      \"value\": 1000\n    }\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/contents/search",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "contents",
-                "search"
               ]
             }
           },
