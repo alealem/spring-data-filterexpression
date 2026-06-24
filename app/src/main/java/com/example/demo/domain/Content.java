@@ -4,15 +4,20 @@ import java.util.*;
 
 import jakarta.persistence.*;
 
+import com.example.search.jpa.Searchable;
+
 @Entity
 @Table(name = "contents")
 public class Content {
 
+  @Searchable
   @Id private UUID id;
 
+  @Searchable
   @Column(nullable = false)
   private String title;
 
+  @Searchable
   private String description;
 
   @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)

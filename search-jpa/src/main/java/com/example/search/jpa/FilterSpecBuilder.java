@@ -1,9 +1,13 @@
 package com.example.search.jpa;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -69,7 +73,7 @@ public final class FilterSpecBuilder {
     validateOperator(v.operator(), resolved);
 
     Expression<?> expr = resolved.expression();
-    Object raw = v.value();
+    Object raw = coerceValue(v.value(), resolved.valueType());
 
     Predicate p =
         switch (v.operator()) {
@@ -110,7 +114,7 @@ public final class FilterSpecBuilder {
 
     CriteriaBuilder.In<Object> in = cb.in(resolved.expression());
     for (Object o : Optional.ofNullable(v.values()).orElse(List.of())) {
-      in.value(o);
+      in.value(coerceValue(o, resolved.valueType()));
     }
 
     return maybeNegate(v.exclude(), in, cb);
@@ -134,8 +138,8 @@ public final class FilterSpecBuilder {
     Predicate p =
         cb.between(
             (Expression) asComparableExpression(resolved.expression()),
-            (Comparable) asComparable(b.from()),
-            (Comparable) asComparable(b.to()));
+            (Comparable) asComparable(coerceValue(b.from(), resolved.valueType())),
+            (Comparable) asComparable(coerceValue(b.to(), resolved.valueType())));
 
     return maybeNegate(b.exclude(), p, cb);
   }
@@ -174,5 +178,32 @@ public final class FilterSpecBuilder {
       return c;
     }
     throw new IllegalArgumentException("Value is not comparable: " + raw);
+  }
+
+  private static Object coerceValue(Object raw, SearchValueType valueType) {
+    if (raw == null) {
+      return null;
+    }
+
+    return switch (valueType) {
+      case STRING -> Objects.toString(raw, null);
+      case UUID -> raw instanceof UUID uuid ? uuid : UUID.fromString(Objects.toString(raw));
+      case NUMBER -> coerceNumber(raw);
+      case BOOLEAN -> raw instanceof Boolean bool ? bool : Boolean.valueOf(Objects.toString(raw));
+      case DATE -> raw instanceof LocalDate date ? date : LocalDate.parse(Objects.toString(raw));
+      case DATETIME ->
+          raw instanceof OffsetDateTime dateTime
+              ? dateTime
+              : OffsetDateTime.parse(Objects.toString(raw));
+      case UNKNOWN -> raw;
+    };
+  }
+
+  private static BigDecimal coerceNumber(Object raw) {
+    return switch (raw) {
+      case BigDecimal decimal -> decimal;
+      case Number number -> new BigDecimal(number.toString());
+      default -> new BigDecimal(Objects.toString(raw));
+    };
   }
 }

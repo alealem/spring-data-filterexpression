@@ -8,11 +8,13 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.example.search.jpa.Searchable;
 
 @Entity
 @Table(name = "content_items")
 public class ContentItem {
 
+  @Searchable
   @Id private UUID id;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

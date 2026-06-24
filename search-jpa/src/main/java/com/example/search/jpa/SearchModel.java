@@ -20,7 +20,7 @@ public class SearchModel<T> {
     return new SearchModelBuilder<>();
   }
 
-  public SearchModel(List<SearchFieldRoot<T>> roots) {
+  SearchModel(List<SearchFieldRoot<T>> roots) {
     this.roots =
         roots.stream()
             .sorted(
@@ -29,7 +29,7 @@ public class SearchModel<T> {
             .toList();
   }
 
-  public ResolvedField resolve(
+  ResolvedField resolve(
       Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb, FieldPathDto field) {
     List<String> segs = field == null ? List.of() : field.segments();
     if (segs.isEmpty()) {

@@ -4,5 +4,5 @@ import java.util.Set;
 
 import jakarta.persistence.criteria.Expression;
 
-public record ResolvedField(
+record ResolvedField(
     Expression<?> expression, SearchValueType valueType, Set<String> supportedOperators) {}
